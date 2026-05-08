@@ -250,22 +250,37 @@
                  <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.15.0</version>
                     </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.9.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.5.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>3.5.4</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -273,7 +288,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.2</version>
                 <configuration>
                     <rules>
                         <requireMavenVersion>
@@ -293,7 +307,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.4.0</version>
                 <configuration>
                     <attachClasses>true</attachClasses>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
@@ -321,7 +334,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>3.1.2</version>
                 <executions>
                     <execution>
                         <phase>post-integration-test</phase>
@@ -342,7 +354,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>3.1.2</version>
                 <configuration>
                     <skipSurefireReport>${skipSurefireReport}</skipSurefireReport>
                     <aggregate>true</aggregate>
@@ -368,13 +379,9 @@
             <id>custom</id>
         </profile>
 
-
         <!-- Profiles for the application servers against which the tests are run -->
 
-
         <!-- ### GlassFish ### -->
-
-
         <profile>
             <id>glassfish-ci-managed</id>
 
@@ -385,7 +392,7 @@
             <properties>
                 <!-- Explicit version of Mojarra to test -->
                 <mojarra.noupdate>false</mojarra.noupdate>
-                <mojarra.version>4.0.17-SNAPSHOT</mojarra.version>
+                <mojarra.version>4.0.17</mojarra.version>
 
                 <!-- Verhicle used for testing the Mojarra version -->
                 <glassfish.version>7.0.25</glassfish.version>
@@ -508,10 +515,7 @@
             </build>
         </profile>
 
-
-
         <!-- ### PIRANHA ### -->
-
         <profile>
             <id>piranha-embedded-micro</id>
 
@@ -548,10 +552,7 @@
             </build>
         </profile>
 
-
-
         <!-- ### TOMCAT ### -->
-
         <profile>
             <id>tomcat-remote</id>
 
@@ -584,7 +585,6 @@
                 </plugins>
             </build>
         </profile>
-
 
         <profile>
             <id>tomcat-ci-managed</id>
@@ -692,19 +692,51 @@
             </build>
         </profile>
 
+        <!-- ### WildFly ### -->
         <profile>
-            <id>wildfly-ci-managed</id>
+            <id>wildfly</id>
+            <activation>
+                <property>
+                    <name>wildfly</name>
+                </property>
+            </activation>
+
+            <properties>
+                <!--  Versions -->
+                <debugJvmArgs/>
+                <mojarra.version>4.0.17</mojarra.version>
+                <!--  Hack to ensure the old-tck POM is valid even through we skip it. -->
+                <glassfish.version>7.0.25</glassfish.version>
+
+                <sigtest.api.groupId>org.glassfish</sigtest.api.groupId>
+                <sigtest.api.artifactId>jakarta.faces</sigtest.api.artifactId>
+                <sigtest.api.version>${faces.version}</sigtest.api.version>
+                <maven.repo.local>${settings.localRepository}</maven.repo.local>
+                <localRepositoryPath>${maven.repo.local}</localRepositoryPath>
+            </properties>
+
             <dependencies>
+                <!-- Required for compiling faces23/refreshPeriodExplicit and faces23/refreshPeriodProduction -->
+                <dependency>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>jakarta.faces</artifactId>
+                    <version>${mojarra.version}</version>
+                </dependency>
                 <dependency>
                     <groupId>org.wildfly.arquillian</groupId>
                     <artifactId>wildfly-arquillian-container-managed</artifactId>
-                    <version>5.0.0.Alpha1</version>
+                    <version>5.0.1.Final</version>
                     <exclusions>
                         <exclusion>
                             <groupId>org.jboss.sasl</groupId>
                             <artifactId>jboss-sasl</artifactId>
                         </exclusion>
                     </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.logmanager</groupId>
+                    <artifactId>jboss-logmanager</artifactId>
+                    <version>3.2.2.Final</version>
                 </dependency>
             </dependencies>
             <build>
@@ -724,9 +756,7 @@
             </build>
         </profile>
 
-
         <!-- ### Payara ### -->
-
         <profile>
             <id>payara-ci-remote</id>
 
